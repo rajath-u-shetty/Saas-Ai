@@ -1,6 +1,7 @@
 import { getAuthSession } from "@/lib/auth";
-import { publicProcedure, router } from "./trpc";
+import { privateProcedure, publicProcedure, router } from "./trpc";
 import { TRPCError } from "@trpc/server";
+import { db } from "@/lib/db";
 
 type UserId = string
 
@@ -16,11 +17,34 @@ export const appRouter = router({
         const session = await getAuthSession();
         const user = session?.user
 
-        if(!user || !user?.email){
-            throw new TRPCError({ code: "BAD_REQUEST"})
+        if (!user?.id || !user.email){
+          throw new TRPCError({ code: 'UNAUTHORIZED' })
+        }
+
+        const dbUser = await db.user.findFirst({
+          where: {
+            id: user.id,
+          }
+        })
+
+        if(!dbUser){
+          await db.user.create({
+            data: {
+              id: user.id,
+              email: user.email,
+            }
+          })
         }
 
         return {success: true}
+    }),
+    getUserFiles: privateProcedure.query(async({ctx}) => {
+      const {userId, user} = ctx
+      return await db.file.findMany({
+        where: {
+          userId
+        }
+      })
     })
 });
 

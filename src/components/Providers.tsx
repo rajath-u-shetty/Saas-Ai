@@ -1,4 +1,4 @@
-'use clieenr'
+'use client'
 
 import { Children, PropsWithChildren, useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"

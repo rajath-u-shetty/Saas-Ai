@@ -13,7 +13,7 @@ const Navbar = async () => {
       <MaxWidthWrapper>
         <div className="flex h-14 items-center justify-between border-b border-zinc-200 dark:border-0">
           <Link href="/" className={cn(buttonVariants({variant : "ghost"}),"flex z-40 font-bold text-2xl")} aria-disabled={true} >
-            LangChain
+            AI-Saas
           </Link>
 
           {/* add mobile navbar */}
