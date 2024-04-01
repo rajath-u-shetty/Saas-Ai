@@ -2,6 +2,7 @@ import { getAuthSession } from "@/lib/auth";
 import { privateProcedure, publicProcedure, router } from "./trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/lib/db";
+import { z } from "zod"
 
 type UserId = string
 
@@ -45,6 +46,45 @@ export const appRouter = router({
           userId
         }
       })
+    }),
+    deleteFile: privateProcedure.input(
+      z.object({ id: z.string()})
+    ).mutation(async({ctx, input})=>{
+      const {userId} = ctx;
+      const file = await db.file.findFirst({
+        where: {
+          id: input.id,
+          userId,
+        }
+      })
+
+      if(!file) throw new TRPCError({ code: "NOT_FOUND"})
+
+      await db.file.delete({
+        where:{
+          id: input.id,
+        }
+      })
+
+      return file;
+    }),
+    getFile: privateProcedure.input(z.object({
+      key: z.string()
+    })).mutation(async({ctx, input}) => {
+      const {userId} = ctx
+      
+      const file = await db.file.findFirst({
+        where: {
+          key: input.key,
+          userId,
+        }
+      })
+      
+      if(!file){
+        throw new TRPCError({code: "UNAUTHORIZED"})
+      }
+
+      return file
     })
 });
 
